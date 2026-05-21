@@ -525,7 +525,7 @@ $plans = [
 
         <h1>💹 Investment Plans</h1>
         <p class="muted" style="margin-bottom:24px;">
-            Capital is deducted from your balance when you invest. Returns are credited when you claim maturity.
+            Capital is deducted from the total balance and the ROI gained is added Back to total balance.
         </p>
 
         <!-- Plan cards (clicking selects the plan via JS) -->
