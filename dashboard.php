@@ -516,7 +516,7 @@ $plans = [
                     <label class="form-label">Amount (Rs.)</label>
                     <input class="form-input" type="number" name="amount" placeholder="e.g. 10000" min="1" required>
                 </div>
-                <button type="submit" class="btn btn-red">Withdraw</button>
+                <button type="submit" class="btn btn-red">Withdraw </button>
             </form>
         </div>
 
