@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NabilBank Digital - Rojal</title>
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --sidebar-bg: #1a222d;
+            --accent-blue: #58a6ff;
+            --success-green: #238636;
+            --error-red: #f85149;
+            --text-white: #ffffff;
+            --border-color: #30363d;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            overflow: hidden;
+        }
+
+      
+        #login-screen {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-dark);
+        }
+
+        .login-box {
+            background: var(--sidebar-bg);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            width: 320px;
+            box-shadow: 0 10px 30px rgba(#1F0318);
+            border: 1px solid var(--border-color);
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-dark);
+            color: white;
+            box-sizing: border-box;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: var(--success-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+     
+        .container { display: flex; height: 100vh; }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            padding: 25px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 { color: var(--accent-blue); margin-bottom: 40px; }
+
+        .sidebar ul { list-style: none; padding: 0; flex-grow: 1; }
+
+        .sidebar li {
+            padding: 14px 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+            color: #8b949e;
+        }
+
+        .sidebar li:hover, .sidebar li.active {
+            background-color: #21262d;
+            color: var(--accent-blue);
+        }
+
+        .content { flex: 1; padding: 40px; overflow-y: auto; }
+
+        
+        .card {
+            background: var(--sidebar-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .visa-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            padding: 30px;
+            border-radius: 20px;
+            height: 180px;
+            color: white;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #0d1117;
+            border-radius: 20px;
+            height: 10px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-blue);
+            border-radius: 20px;
+            transition: width 1s;
+        }
+
+        .amount { font-size: 26px; font-weight: bold; }
+        .pos { color: #3fb950; }
+        .neg { color: var(--error-red); }
+
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border-color); color: #8b949e; }
+        td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        
+        .status-badge {
+            background: rgba(35, 134, 54, 0.2);
+            color: #3fb950;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>NabilBank</h2>
+            <p style="color:#8b949e">Portal for Rojal</p>
+            <input type="text" id="username" placeholder="Username (admin)">
+            <input type="password" id="password" placeholder="Password (1234)">
+            <button onclick="login()">Login</button>
+            <p id="error" style="color:var(--error-red); display:none; margin-top:10px;">Invalid Credentials</p>
+        </div>
+    </div>
+
+    <div class="container hidden" id="main-app">
+        <nav class="sidebar">
+            <h2>NABIL BANK</h2>
+            <ul>
+                <li onclick="showSection('dashboard')" class="menu-item active" id="nav-dashboard">Dashboard</li>
+                <li onclick="showSection('transactions')" class="menu-item" id="nav-transactions">Transactions</li>
+                <li onclick="showSection('accounts')" class="menu-item" id="nav-accounts">Accounts</li>
+                <li onclick="showSection('settings')" class="menu-item" id="nav-settings">Settings</li>
+            </ul>
+            <div onclick="logout()" style="color:var(--error-red); cursor:pointer; padding:15px; font-weight:bold;">Logout</div>
+        </nav>
+
+        <main class="content">
+            <div id="dashboard" class="page-section">
+                <h1 style="margin-top:0">Welcome back, Rojal</h1>
+                <div style="display: flex; gap: 20px;">
+                    <div style="flex: 2;">
+                        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                            <div class="card" style="flex:1">
+                                <h3 style="margin:0; font-size:14px; color:#8b949e;">TOTAL BALANCE</h3>
+                                <p class="amount">Rs. <span class="balance-text">2400000.00</span></p>
+                            </div>
+                            <div class="card" style="flex:1">
+                                <h3 style="margin:0; font-size:14px; color:#8b949e;">MONTHLY INCOME</h3>
+                                <p class="amount pos">+Rs. 520,000.00</p>
+                            </div>
+                        </div>
+                        <div class="visa-card">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>PLATINUM DEBIT</span>
+                                <strong>NabilBank</strong>
+                            </div>
+                            <div style="margin-top:40px; font-size:22px; letter-spacing:2px; font-family:monospace;">
+                                9765 3401 4621 8810
+                            </div>
+                            <div style="margin-top:20px; display:flex; gap:40px; font-size:12px;">
+                                <div><div style="opacity:0.7">HOLDER</div><div>ROJAL Maharjan</div></div>
+                                <div><div style="opacity:0.7">EXPIRES</div><div>12/29</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="flex: 1.2;">
+                        <div class="card">
+                            <h3 style="margin-top:0; font-size:16px;">Savings Goal</h3>
+                            <div style="display:flex; justify-content:space-between; font-size:14px;">
+                                <span>Amex Crad Platinum</span><strong>72%</strong>
+                            </div>
+                            <div class="progress-container"><div class="progress-bar" style="width: 72%;"></div></div>
+                        </div>
+                        <div class="card">
+                            <h3 style="margin-top:0; font-size:16px;">Notice Board</h3>
+                            <p style="font-size:13px; color:#8b949e;">New interest rates applied to Savings Account.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="transactions" class="page-section hidden">
+                <h1>Transfer & History</h1>
+                <div class="card">
+                    <h3 style="margin-top:0">Fund Transfer</h3>
+                    <div style="display: flex; gap: 15px;">
+                        <input type="text" id="t-name" placeholder="Recipient Name" style="flex:2; padding:12px; background:#0d1117; border:1px solid #30363d; color:white; border-radius:6px;">
+                        <input type="number" id="t-amount" placeholder="Amount (Rs)" style="flex:1; padding:12px; background:#0d1117; border:1px solid #30363d; color:white; border-radius:6px;">
+                        <button onclick="processTransaction()" style="flex:1; background:var(--success-green); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Send Money</button>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:0">
+                    <table id="txn-table">
+                        <thead>
+                            <tr>
+                                <th>Ref ID</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-list">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="accounts" class="page-section hidden">
+                <h1>My Accounts</h1>
+                <div class="card">
+                    <h4>Primary Savings (...0146)</h4>
+                    <p class="amount">Rs. <span class="balance-text">240000.00</span></p>
+                </div>
+            </div>
+
+            <div id="settings" class="page-section hidden">
+                <h1>Settings</h1>
+                <div class="card">
+                    <h3>Security</h3>
+                    <p>Manage Biometrics</p>
+                    <button onclick="alert('Settings Updated')" style="background:var(--accent-blue); color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Save</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        
+        let currentBalance = 240000.00;
+
+       
+        window.onload = () => {
+            addTransactionRow("TXN6782", "Netflix Subscription", "2023-10-24", 1500, "neg");
+            addTransactionRow("TXN1029", "Salary Deposit", "2023-10-20", 260000, "pos");
+        };
+
+        function login() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if(u === "admin" && p === "1234") {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+            } else {
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById('nav-' + id).classList.add('active');
+        }
+
+      
+        function processTransaction() {
+            const name = document.getElementById('t-name').value.trim();
+            const amt = parseFloat(document.getElementById('t-amount').value);
+
+         
+            if (!name) { 
+                alert("Please enter a recipient name."); 
+                return; 
+            }
+            if (isNaN(amt) || amt <= 0) { 
+                alert("Please enter a valid amount."); 
+                return; 
+            }
+            
+            
+            if (amt > currentBalance) { 
+                alert("Transaction Failed: Insufficient funds in your primary account."); 
+                return; 
+            }
+
+         
+            currentBalance -= amt;
+            updateUIBalance();
+
+           
+            const date = new Date().toISOString().split('T')[0];
+            const txnID = "TXN" + Math.floor(1000 + Math.random() * 9000);
+            addTransactionRow(txnID, "Transfer to " + name, date, amt, "neg");
+
+          
+            document.getElementById('t-name').value = "";
+            document.getElementById('t-amount').value = "";
+            alert("Transfer to " + name + " was successful!");
+        }
+
+        function addTransactionRow(id, desc, date, amount, typeClass) {
+            const list = document.getElementById('transaction-list');
+            const row = list.insertRow(0);
+            const prefix = typeClass === "pos" ? "+Rs. " : "-Rs. ";
+            
+            row.innerHTML = `
+                <td style="color:#8b949e">#${id}</td>
+                <td style="font-weight:bold">${desc}</td>
+                <td>${date}</td>
+                <td><span class="status-badge">Completed</span></td>
+                <td class="${typeClass}">${prefix}${amount.toLocaleString()}</td>
+            `;
+        }
+
+        function updateUIBalance() {
+           
+            document.querySelectorAll('.balance-text').forEach(el => {
+                el.innerText = currentBalance.toLocaleString(undefined, {minimumFractionDigits: 2});
+            });
+        }
+
+        function logout() { location.reload(); }
+    </script>
+</body>
+</html>

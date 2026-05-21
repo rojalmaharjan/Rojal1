@@ -1,0 +1,137 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+.sidebar {
+    width: 250px;
+    background-color: #1a2a3a;
+    color: white;
+    padding: 2rem;
+}
+
+.sidebar h2 {
+    margin-bottom: 2px;
+    color: #4da3ff;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar li {
+    padding: 1rem 0;
+    cursor: pointer;
+    border-bottom: 1px solid #2c3e50;
+    transition: 0.3s;
+}
+
+.sidebar li:hover, .sidebar li.active {
+    color: #4da3ff;
+}
+
+
+.content {
+    flex: 1;
+    padding: 2rem;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+
+.stats {
+    display: flex;
+    gap: 1.5rem; 
+    margin-bottom: 2px;
+}
+
+.card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    flex: 1;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.balance { border-left: 5px solid #4da3ff; }
+.income { border-left: 5px solid #2ecc71; }
+
+.amount {
+    font-size: 1.8rem;
+    font-weight: bold;
+     margin-top: 0.5rem;
+}
+
+
+.transfer {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2px;
+}
+
+.transfer-form {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+input {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    flex: 1;
+}
+
+button {
+    padding: 0.8rem 1.5rem;
+    background: #4da3ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.status {
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.completed { background: #d4edda; color: #155724; }
+.pending { background: #fff3cd; color: #856404; }
+.pos { color: #2ecc71; font-weight: bold; }
+.neg { color: #e74c3c; font-weight: bold; }
