@@ -11,6 +11,46 @@ include 'db.php';
 $user_id = $_SESSION['user_id'];
 $page = $_GET['page'] ?? 'dashboard';
 
+// get wallet cards
+$cards = [];
+$cards_result = mysqli_query($conn, "SELECT * FROM cards WHERE user_id = $user_id ORDER BY created_at DESC");
+while($row = mysqli_fetch_assoc($cards_result)){
+    $cards[] = $row;
+}
+
+$wallet_total = 0;
+foreach($cards as $c){
+    $wallet_total += $c['balance'];
+}
+
+$colors = array(
+    'blue'   => 'linear-gradient(135deg, #1e3a8a, #2563eb)',
+    'purple' => 'linear-gradient(135deg, #4c1d95, #7c3aed)',
+    'green'  => 'linear-gradient(135deg, #064e3b, #059669)',
+    'red'    => 'linear-gradient(135deg, #7f1d1d, #dc2626)',
+    'dark'   => 'linear-gradient(135deg, #111827, #374151)',
+);
+
+// handle add card
+if(isset($_POST['add_card'])){
+    $card_name   = $_POST['card_name'];
+    $card_number_new = $_POST['card_number'];
+    $card_holder = $_POST['card_holder'];
+    $card_bal    = $_POST['balance'];
+    $card_color  = $_POST['card_color'];
+    mysqli_query($conn, "INSERT INTO cards (user_id, card_name, card_number, card_holder, balance, card_color) VALUES ('$user_id', '$card_name', '$card_number_new', '$card_holder', '$card_bal', '$card_color')");
+    header('Location: dashboard.php?page=wallet&ok=1');
+    exit;
+}
+
+// handle delete card
+if(isset($_GET['delete_card'])){
+    $card_id = $_GET['delete_card'];
+    mysqli_query($conn, "DELETE FROM cards WHERE id = $card_id AND user_id = $user_id");
+    header('Location: dashboard.php?page=wallet');
+    exit;
+}
+
 // get user info
 $result = mysqli_query($conn, "SELECT full_name, balance, card_number, username FROM users WHERE id = $user_id");
 $user = mysqli_fetch_assoc($result);
@@ -38,7 +78,7 @@ $alert = '';
 $atype = '';
 
 if(isset($_GET['ok'])){
-    $ref = $_GET['ref'];
+    $ref = $_GET['ref'] ?? '';
     if($page == 'withdraw'){
         $alert = "Withdrawal successful! Reference: #$ref";
         $atype = 'success';
@@ -81,6 +121,13 @@ $plans = [
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .wallet-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:16px; margin-bottom:32px; }
+.bank-card { border-radius:16px; padding:24px; color:#fff; position:relative; }
+.bank-card-name { font-size:13px; opacity:0.8; margin-bottom:20px; }
+.bank-card-num  { font-family:monospace; font-size:17px; letter-spacing:2px; margin-bottom:20px; }
+.bank-card-bottom { display:flex; justify-content:space-between; align-items:flex-end; }
+.delete-btn { position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.3); color:#fff; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; text-decoration:none; }
 
         :root {
             --bg: #0d1117;
@@ -175,7 +222,8 @@ $plans = [
 
 <aside class="sidebar">
     <div class="sidebar-logo">🏦 IsraelStateBank</div>
-
+    
+    <a href="dashboard.php?page=wallet" class="nav-item <?= $page=='wallet' ? 'active':'' ?>">👜 Wallet</a>
     <a href="dashboard.php?page=dashboard"    class="nav-item <?= $page=='dashboard'    ? 'active':'' ?>">🏠 Dashboard</a>
     <a href="dashboard.php?page=transactions" class="nav-item <?= $page=='transactions' ? 'active':'' ?>">💸 Transfer</a>
     <a href="dashboard.php?page=withdraw"     class="nav-item <?= $page=='withdraw'     ? 'active':'' ?>">🏧 Withdraw</a>
@@ -204,6 +252,31 @@ $plans = [
     <?php if($page == 'dashboard'){ ?>
 
         <h1>Welcome back, <?= explode(' ', $full_name)[0] ?> 👋</h1>
+       
+       
+        <?php if(count($cards) > 0){ ?>
+<div style="margin-bottom:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h2 style="margin-bottom:0;">👜 My Wallet</h2>
+        <a href="dashboard.php?page=wallet" style="color:var(--blue); font-size:13px; text-decoration:none;">View all →</a>
+    </div>
+    <div class="wallet-grid">
+        <?php foreach($cards as $c){
+            $bg = isset($colors[$c['card_color']]) ? $colors[$c['card_color']] : $colors['blue'];
+            $masked = '•••• •••• •••• ' . substr(str_replace(' ','',$c['card_number']), -4);
+        ?>
+        <div class="bank-card" style="background:<?= $bg ?>;">
+            <div class="bank-card-name"><?= htmlspecialchars($c['card_name']) ?></div>
+            <div class="bank-card-num"><?= $masked ?></div>
+            <div class="bank-card-bottom">
+                <div>CARD HOLDER<br><strong><?= strtoupper(htmlspecialchars($c['card_holder'])) ?></strong></div>
+                <div style="text-align:right;">BALANCE<br><span style="font-size:16px; font-weight:700;">Rs. <?= number_format($c['balance'], 2) ?></span></div>
+            </div>
+        </div>
+        <?php } ?>
+    </div>
+</div>
+<?php } ?>
 
         <div class="grid3">
             <div class="card">
@@ -466,6 +539,59 @@ $plans = [
                 </tr>
             </table>
         </div>
+        <?php } elseif($page == 'wallet'){ ?>
+
+    <h1>👜 My Wallet</h1>
+
+    <div class="card" style="max-width:300px; margin-bottom:24px;">
+        <div class="card-label">Total Wallet Balance</div>
+        <div style="font-size:28px; font-weight:700; color:#3fb950; margin-top:6px;">Rs. <?= number_format($wallet_total, 2) ?></div>
+        <div class="muted" style="font-size:12px; margin-top:4px;">Across <?= count($cards) ?> card(s)</div>
+    </div>
+
+    <?php if(count($cards) == 0){ ?>
+        <p class="muted" style="margin-bottom:24px;">No cards yet. Add one below!</p>
+    <?php } else { ?>
+    <div class="wallet-grid">
+        <?php foreach($cards as $c){
+            $bg = isset($colors[$c['card_color']]) ? $colors[$c['card_color']] : $colors['blue'];
+            $masked = '•••• •••• •••• ' . substr(str_replace(' ','',$c['card_number']), -4);
+        ?>
+        <div class="bank-card" style="background:<?= $bg ?>;">
+            <a href="dashboard.php?page=wallet&delete_card=<?= $c['id'] ?>" onclick="return confirm('Delete this card?')" class="delete-btn">✕</a>
+            <div class="bank-card-name"><?= htmlspecialchars($c['card_name']) ?></div>
+            <div class="bank-card-num"><?= $masked ?></div>
+            <div class="bank-card-bottom">
+                <div>CARD HOLDER<br><strong><?= strtoupper(htmlspecialchars($c['card_holder'])) ?></strong></div>
+                <div style="text-align:right;">BALANCE<br><span style="font-size:16px; font-weight:700;">Rs. <?= number_format($c['balance'], 2) ?></span></div>
+            </div>
+        </div>
+        <?php } ?>
+    </div>
+    <?php } ?>
+
+    <div class="card" style="max-width:480px;">
+        <h2>➕ Add New Card</h2>
+        <form method="POST" action="dashboard.php?page=wallet">
+            <label class="form-label">Card Name</label>
+            <input type="text" name="card_name" class="form-input" placeholder="e.g. Nabil Bank" required>
+            <label class="form-label">Card Number</label>
+            <input type="text" name="card_number" class="form-input" placeholder="e.g. 1234 5678 9012 3456" required>
+            <label class="form-label">Card Holder Name</label>
+            <input type="text" name="card_holder" class="form-input" placeholder="e.g. Ram Bahadur" required>
+            <label class="form-label">Balance (Rs.)</label>
+            <input type="number" name="balance" class="form-input" placeholder="e.g. 5000" min="0" required>
+            <label class="form-label">Card Color</label>
+            <select name="card_color" class="form-input">
+                <option value="blue">🔵 Blue</option>
+                <option value="purple">🟣 Purple</option>
+                <option value="green">🟢 Green</option>
+                <option value="red">🔴 Red</option>
+                <option value="dark">⚫ Dark</option>
+            </select>
+            <button type="submit" name="add_card" class="btn btn-green" style="width:100%; margin-top:4px;">Add Card</button>
+        </form>
+    </div>
 
     <?php } ?>
 
